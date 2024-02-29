@@ -32,7 +32,11 @@ tract_locations = tracts[['GEOID', 'lon', 'lat']]
 tract_locations_df = pd.DataFrame(tract_locations)
 # Initialize an empty DataFrame for consolidated data
 # Initialize an empty DataFrame for consolidated data with additional columns for utility name and Rate name
-consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name', "startdate", "enddate", "label", "getpage", "ratesforutility"])
+# consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name', "startdate", "enddate", "label", "getpage", "ratesforutility",
+#                                           "demandweekdayschedule", "demandweekendschedule"])
+
+consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name', "ratesforutility",
+                                          "demandweekdayschedule", "demandweekendschedule"])
 
 # Your API key and base URL
 api_key = '9ED4OxQpOHLCajotcjhqAvvN1BebbVG4dVk7AcyU'.strip()
@@ -43,7 +47,8 @@ for index, row in tract_locations_df.iterrows():
         'api_key': api_key,
         'lat': row['lat'],
         'lon': row['lon'],
-        'format': 'json'  # Explicitly request JSON format
+        'format': 'json',
+        "detail": "full"  # Explicitly request JSON format
     }
     response = requests.get(base_url, params=params)
     if response.status_code == 200:
@@ -53,11 +58,12 @@ for index, row in tract_locations_df.iterrows():
         if 'items' in data:
 
             for item in data['items']:
-                label = item.get('label', 'N/A')  # Retrieve the label value from the item
+                utility = item.get('utility', 'N/A')  # Retrieve the label value from the item
                 # Construct the getpage value or URL using the label
                 # Assuming 'getpage' is a URL parameter, you might construct a URL like so:
-                getpage_url = f"https://api.openei.org/utility_rates?version=3&getpage={label}&api_key={api_key}"
-                rate_url = f"https://api.openei.org/utility_rates?version=3&ratesforutility={getpage_url}&api_key={api_key}"
+                # getpage_url = f"https://api.openei.org/utility_rates?version=3&getpage={utility}&api_key={api_key}"
+
+                rate_url = f"https://api.openei.org/utility_rates?version=3&ratesforutility={utility}&api_key={api_key}"
 
                 new_row = {
                     'GEOID': row['GEOID'],
@@ -66,11 +72,13 @@ for index, row in tract_locations_df.iterrows():
                     "sector": item.get("sector", 'N/A'),
                     "utility_name": item.get('utility', 'N/A'),  # Default if not found
                     'Rate_name': item.get('name', 'N/A'),  # Default if not found
-                    'startdate': item.get('startdate', 'N/A'),
-                    'enddate': item.get('enddate', 'N/A'),
-                    'label': label,
-                    'getpage': getpage_url,
-                    'ratesforutility': rate_url
+                    # 'startdate': item.get('startdate', 'N/A'),
+                    # 'enddate': item.get('enddate', 'N/A'),
+                    # 'label': label,
+                    # 'getpage': getpage_url,
+                    'ratesforutility': rate_url,
+                    "demandweekdayschedule": item.get('demandweekdayschedule', []),
+                    "demandweekendschedule": item.get('demandweekendschedule', [])
                 }
                 # Append the new row to consolidated_data DataFrame
                 consolidated_data = pd.concat([consolidated_data, pd.DataFrame([new_row])], ignore_index=True)
