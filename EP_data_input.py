@@ -60,7 +60,7 @@ for index, row in tract_locations_df.iterrows():
             for item in data['items']:
                 utility = item.get('utility', 'N/A')  # Retrieve the label value from the item
                 # Assuming 'rate_url' is a URL parameter, you might construct a URL like so:
-                rate_url = f"https://api.openei.org/utility_rates?version=3&ratesforutility={utility}&api_key={api_key}"
+                rate_url = f"https://api.openei.org/utility_rates?version=3&format=json&ratesforutility={utility}&api_key={api_key}"
 
                 new_row = {
                     'GEOID': row['GEOID'],
@@ -69,7 +69,7 @@ for index, row in tract_locations_df.iterrows():
                     "sector": item.get("sector", 'N/A'),
                     "utility_name":utility,  # Default if not found
                     'Rate_name': item.get('name', 'N/A'),  # Default if not found
-                    'ratesforutility': rate_url,
+                    'ratesforutility':item.get('demandratestructure', []),
                     "demandweekdayschedule": item.get('demandweekdayschedule', []),
                     "demandweekendschedule": item.get('demandweekendschedule', [])
                 }
