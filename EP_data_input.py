@@ -32,12 +32,11 @@ tract_locations = tracts[['GEOID', 'lon', 'lat']]
 tract_locations_df = pd.DataFrame(tract_locations)
 # Initialize an empty DataFrame for consolidated data
 # Initialize an empty DataFrame for consolidated data with additional columns for utility name and Rate name
-# consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name', "startdate", "enddate", "label", "getpage", "ratesforutility",
-#                                           "demandweekdayschedule", "demandweekendschedule"])
 
-consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name', "ratesforutility",
-                                          "demandweekdayschedule", "demandweekendschedule"])
-
+consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name',
+                                          "demandrate", "demandweekdayschedule", "demandweekendschedule",
+                                          "energyratestructure", "energyweekdayschedule", "energyweekendschedule",
+                                          "fixedmonthlycharge", "minmonthlycharge", "annualmincharge", "fixedattrs"])
 # Your API key and base URL
 api_key = '9ED4OxQpOHLCajotcjhqAvvN1BebbVG4dVk7AcyU'.strip()
 base_url = 'https://api.openei.org/utility_rates?version=3&'
@@ -67,11 +66,18 @@ for index, row in tract_locations_df.iterrows():
                     'lat': row['lat'],
                     'lon': row['lon'],
                     "sector": item.get("sector", 'N/A'),
-                    "utility_name":utility,  # Default if not found
+                    "utility_name": utility,  # Default if not found
                     'Rate_name': item.get('name', 'N/A'),  # Default if not found
-                    'ratesforutility':item.get('demandratestructure', []),
+                    'demandrate': item.get('demandratestructure', []),
                     "demandweekdayschedule": item.get('demandweekdayschedule', []),
-                    "demandweekendschedule": item.get('demandweekendschedule', [])
+                    "demandweekendschedule": item.get('demandweekendschedule', []),
+                    'energyratestructure': item.get('energyratestructure', []),
+                    "energyweekdayschedule": item.get('energyweekdayschedule', []),
+                    "energyweekendschedule": item.get('energyweekendschedule', []),
+                    'fixedmonthlycharge': item.get('fixedmonthlycharge', 'N/A'),
+                    "minmonthlycharge": item.get('minmonthlycharge', 'N/A'),
+                    "annualmincharge": item.get('annualmincharge', 'N/A'),
+                    "fixedattrs": item.get('fixedattrs', 'N/A')
                 }
                 # Append the new row to consolidated_data DataFrame
                 consolidated_data = pd.concat([consolidated_data, pd.DataFrame([new_row])], ignore_index=True)
