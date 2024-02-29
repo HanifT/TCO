@@ -6,8 +6,7 @@ import pandas as pd
 from zipfile import ZipFile
 from io import BytesIO
 
-
-#%%
+# %%
 # Download the Census Tract Geometries
 url = "https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_tract_500k.zip"
 response = requests.get(url)
@@ -32,43 +31,53 @@ tract_locations = tracts[['GEOID', 'lon', 'lat']]
 # Optionally, convert the GeoDataFrame to a Pandas DataFrame if no geometry is needed
 tract_locations_df = pd.DataFrame(tract_locations)
 # Initialize an empty DataFrame for consolidated data
-consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'utility_name', 'commercial', 'industrial', 'residential'])
-# Initialize an empty list to store row data
+# Initialize an empty DataFrame for consolidated data with additional columns for utility name and Rate name
+consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name', "startdate", "enddate", "label", "getpage", "ratesforutility"])
+
+# Your API key and base URL
+api_key = '9ED4OxQpOHLCajotcjhqAvvN1BebbVG4dVk7AcyU'.strip()
+base_url = 'https://api.openei.org/utility_rates?version=3&'
 new_rows = []
-
-api_key = '5NafpqgGlLOBTehX0g7wPnu6qxpYn35jGVjFBnmj'.strip()
-base_url = 'https://developer.nrel.gov/api/census_rate/v3.json?'
-
-# Loop through each row in the DataFrame
 for index, row in tract_locations_df.iterrows():
     params = {
         'api_key': api_key,
-        'region': 'tract',
         'lat': row['lat'],
         'lon': row['lon'],
+        'format': 'json'  # Explicitly request JSON format
     }
     response = requests.get(base_url, params=params)
-
     if response.status_code == 200:
+
         data = response.json()
-        new_row = {
-            'GEOID': row['GEOID'],
-            'lat': row['lat'],
-            'lon': row['lon'],
-            'utility_name': data['outputs'].get('utility_name', ''),
-            'commercial': data['outputs'].get('commercial', None),
-            'industrial': data['outputs'].get('industrial', None),
-            'residential': data['outputs'].get('residential', None)
-        }
-        new_rows.append(new_row)
+
+        if 'items' in data:
+
+            for item in data['items']:
+                label = item.get('label', 'N/A')  # Retrieve the label value from the item
+                # Construct the getpage value or URL using the label
+                # Assuming 'getpage' is a URL parameter, you might construct a URL like so:
+                getpage_url = f"https://api.openei.org/utility_rates?version=3&getpage={label}&api_key={api_key}"
+                rate_url = f"https://api.openei.org/utility_rates?version=3&ratesforutility={getpage_url}&api_key={api_key}"
+
+                new_row = {
+                    'GEOID': row['GEOID'],
+                    'lat': row['lat'],
+                    'lon': row['lon'],
+                    "sector": item.get("sector", 'N/A'),
+                    "utility_name": item.get('utility', 'N/A'),  # Default if not found
+                    'Rate_name': item.get('name', 'N/A'),  # Default if not found
+                    'startdate': item.get('startdate', 'N/A'),
+                    'enddate': item.get('enddate', 'N/A'),
+                    'label': label,
+                    'getpage': getpage_url,
+                    'ratesforutility': rate_url
+                }
+                # Append the new row to consolidated_data DataFrame
+                consolidated_data = pd.concat([consolidated_data, pd.DataFrame([new_row])], ignore_index=True)
+        else:
+            print(f"No 'items' key in response for region {row['lat']}, {row['lon']}")
     else:
         print(f"Failed to download data for region {row['lat']}, {row['lon']}")
-
-# Create a new DataFrame from the list of new rows and concatenate it with the original DataFrame
-new_data_df = pd.DataFrame(new_rows)
-consolidated_data = pd.concat([consolidated_data, new_data_df], ignore_index=True)
-
-print(consolidated_data.head())
 
 # Save the consolidated DataFrame to a CSV file
 consolidated_data.to_csv('consolidated_data.csv', index=False)
