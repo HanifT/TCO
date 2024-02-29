@@ -59,10 +59,7 @@ for index, row in tract_locations_df.iterrows():
 
             for item in data['items']:
                 utility = item.get('utility', 'N/A')  # Retrieve the label value from the item
-                # Construct the getpage value or URL using the label
-                # Assuming 'getpage' is a URL parameter, you might construct a URL like so:
-                # getpage_url = f"https://api.openei.org/utility_rates?version=3&getpage={utility}&api_key={api_key}"
-
+                # Assuming 'rate_url' is a URL parameter, you might construct a URL like so:
                 rate_url = f"https://api.openei.org/utility_rates?version=3&ratesforutility={utility}&api_key={api_key}"
 
                 new_row = {
@@ -70,12 +67,8 @@ for index, row in tract_locations_df.iterrows():
                     'lat': row['lat'],
                     'lon': row['lon'],
                     "sector": item.get("sector", 'N/A'),
-                    "utility_name": item.get('utility', 'N/A'),  # Default if not found
+                    "utility_name":utility,  # Default if not found
                     'Rate_name': item.get('name', 'N/A'),  # Default if not found
-                    # 'startdate': item.get('startdate', 'N/A'),
-                    # 'enddate': item.get('enddate', 'N/A'),
-                    # 'label': label,
-                    # 'getpage': getpage_url,
                     'ratesforutility': rate_url,
                     "demandweekdayschedule": item.get('demandweekdayschedule', []),
                     "demandweekendschedule": item.get('demandweekendschedule', [])
