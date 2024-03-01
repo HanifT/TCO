@@ -47,6 +47,7 @@ for index, row in tract_locations_df.iterrows():
         'lat': row['lat'],
         'lon': row['lon'],
         'format': 'json',
+        'sector': 'Commercial',
         "detail": "full"  # Explicitly request JSON format
     }
     response = requests.get(base_url, params=params)
@@ -88,3 +89,5 @@ for index, row in tract_locations_df.iterrows():
 
 # Save the consolidated DataFrame to a CSV file
 consolidated_data.to_csv('consolidated_data.csv', index=False)
+
+###############################################
