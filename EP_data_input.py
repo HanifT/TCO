@@ -7,7 +7,7 @@ from zipfile import ZipFile
 from io import BytesIO
 
 # %%
-# Download the Census Tract Geometries
+# Download the Census Tract Geometries (county)
 # url = "https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_tract_500k.zip"
 url = "https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_county_5m.zip"
 response = requests.get(url)
