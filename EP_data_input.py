@@ -8,7 +8,8 @@ from io import BytesIO
 
 # %%
 # Download the Census Tract Geometries
-url = "https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_tract_500k.zip"
+# url = "https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_tract_500k.zip"
+url = "https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_2021_us_county_5m.zip"
 response = requests.get(url)
 print("Tracts Downloaded")
 
@@ -18,7 +19,8 @@ with ZipFile(BytesIO(response.content)) as zip_ref:
 print("Tracts Unzipped")
 
 # Read the Shapefile
-tract_file = "Data/ACS_2021/Tract_Geometries/cb_2021_us_tract_500k.shp"
+# tract_file = "Data/ACS_2021/Tract_Geometries/cb_2021_us_tract_500k.shp"
+tract_file = "Data/ACS_2021/Tract_Geometries/cb_2021_us_county_5m.shp"
 tracts = gpd.read_file(tract_file)
 
 # Create a DataFrame with Latitude and Longitude
@@ -90,5 +92,5 @@ for index, row in tract_locations_df.iterrows():
 # Save the consolidated DataFrame to a CSV file
 consolidated_data.to_csv('consolidated_data.csv', index=False)
 
-##############################################hasan
+##############################################
 
