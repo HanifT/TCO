@@ -35,15 +35,31 @@ tract_locations_df = pd.DataFrame(tract_locations)
 # Initialize an empty DataFrame for consolidated data
 # Initialize an empty DataFrame for consolidated data with additional columns for utility name and Rate name
 
-consolidated_data = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name',
-                                          "demandrate", "demandweekdayschedule", "demandweekendschedule",
-                                          "energyratestructure", "energyweekdayschedule", "energyweekendschedule",
-                                          "fixedmonthlycharge", "minmonthlycharge", "annualmincharge", "fixedattrs"])
+consolidated_data1 = pd.DataFrame(columns=['GEOID', 'lat', 'lon', 'sector', 'utility_name', 'Rate_name',
+                                           "demandrate", "demandweekdayschedule", "demandweekendschedule",
+                                           "energyratestructure", "energyweekdayschedule", "energyweekendschedule",
+                                           "fixedmonthlycharge", "minmonthlycharge", "annualmincharge", "fixedattrs"])
 # Your API key and base URL
-api_key = '9ED4OxQpOHLCajotcjhqAvvN1BebbVG4dVk7AcyU'.strip()
+# api_key = '9ED4OxQpOHLCajotcjhqAvvN1BebbVG4dVk7AcyU'.strip() # ucdavis.edu
+# api_key = 'oPuhNmPIkLWHqF0ZyVyjCIdjdb4qABKIRxFGm3p4'.strip() # gmail.com
+api_key = 'YK13Yb1bbOVF2upGFl6R4LZAorqtP2HEy9Esnkcx'.strip()  # ymail.com
 base_url = 'https://api.openei.org/utility_rates?version=3&'
 new_rows = []
-for index, row in tract_locations_df.iterrows():
+
+# Define the start and end indices for the subset of data you want to process
+start_index = 3000
+end_index = 4000
+
+# Create a subset of the DataFrame based on the defined indices
+subset_df = tract_locations_df.iloc[start_index:end_index]
+# Initialize an empty DataFrame to store the results
+consolidated_data1 = pd.DataFrame()
+
+
+# Loop through the subset DataFrame
+for index, row in subset_df.iterrows():
+# for index, row in tract_locations_df.iterrows():
+    print(index)
     params = {
         'api_key': api_key,
         'lat': row['lat'],
@@ -83,14 +99,10 @@ for index, row in tract_locations_df.iterrows():
                     "fixedattrs": item.get('fixedattrs', 'N/A')
                 }
                 # Append the new row to consolidated_data DataFrame
-                consolidated_data = pd.concat([consolidated_data, pd.DataFrame([new_row])], ignore_index=True)
+                consolidated_data1 = pd.concat([consolidated_data1, pd.DataFrame([new_row])], ignore_index=True)
         else:
             print(f"No 'items' key in response for region {row['lat']}, {row['lon']}")
     else:
         print(f"Failed to download data for region {row['lat']}, {row['lon']}")
 
 # Save the consolidated DataFrame to a CSV file
-consolidated_data.to_csv('consolidated_data.csv', index=False)
-
-##############################################
-

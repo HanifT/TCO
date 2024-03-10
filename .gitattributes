@@ -1,0 +1,4 @@
+consolidated_data0.csv filter=lfs diff=lfs merge=lfs -text
+TOU[[:space:]]county[[:space:]]level[[:space:]]data/consolidated_data0.csv filter=lfs diff=lfs merge=lfs -text
+TOU[[:space:]]county[[:space:]]level[[:space:]]data/consolidated_data1.csv filter=lfs diff=lfs merge=lfs -text
+TOU[[:space:]]county[[:space:]]level[[:space:]]data/consolidated_data2.csv filter=lfs diff=lfs merge=lfs -text
